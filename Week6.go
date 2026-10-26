@@ -1,0 +1,14 @@
+package main
+
+import "fmt"
+
+func main() {
+    var str1, str2 string
+
+    fmt.Println("Enter two strings:")
+    fmt.Scan(&str1, &str2)
+
+    result := str1 + str2
+
+    fmt.Println("The concatenated string is:", result)
+}
