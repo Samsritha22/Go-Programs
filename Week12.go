@@ -1,0 +1,13 @@
+package main
+
+import (
+    "fmt"
+    "strings"
+)
+
+func main() {
+    fmt.Println(strings.Contains("Sai Samsritha", "Sai"))
+    fmt.Println(strings.ContainsAny("Sai Samsritha", "sri"))
+    fmt.Println(strings.Count("banana", "a"))
+    fmt.Println(strings.EqualFold("Samsritha", "samsritha"))
+}
