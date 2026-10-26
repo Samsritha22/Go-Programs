@@ -1,0 +1,31 @@
+package main
+
+import (
+    "fmt"
+    "math"
+)
+
+func main() {
+    var n,i int
+    var sum, mean, variance, sq, std float64
+
+    fmt.Println("Enter the size of array: ")
+    fmt.Scan(&n)
+    arr := make([]float64, n)
+    sum = 0
+    fmt.Println("Enter the numbers")
+    for i=0;i<n;i++ {
+        fmt.Scan(&arr[i])
+        sum += arr[i]
+    }
+    mean = sum/float64(n)
+    for i=0;i<n;i++ {
+        diff := arr[i]-mean
+        sq += diff*diff
+    }
+    variance = sq/float64(n)
+    std = math.Sqrt(variance)
+    fmt.Println("Mean of the numbers is:", mean)
+    fmt.Println("Variance of the numbers is:", variance)
+    fmt.Println("Standard deviation of the numbers is:", std)
+}
