@@ -1,0 +1,114 @@
+Week-14
+
+CREATE DATABASE college;
+USE college;
+
+
+/*Create a table:*/
+CREATE TABLE students (
+id INT PRIMARY KEY AUTO_INCREMENT,
+name VARCHAR(100) NOT NULL,
+age INT NOT NULL,
+course VARCHAR(100) NOT NULL
+);
+
+
+/*Check the table:*/
+DESC students;
+
+
+
+Code:
+package main
+import (
+"database/sql"
+"fmt"
+"log"
+"runtime"
+"sync"
+_ "github.com/go-sql-driver/mysql"
+)
+var db *sql.DB
+// CREATE
+func createStudent(workerID int, wg *sync.WaitGroup) {
+defer wg.Done()
+name := fmt.Sprintf("Student%d", workerID)
+age := 20 + workerID
+course := fmt.Sprintf("Course%d", workerID)
+query := `INSERT INTO students (name, age, course) VALUES (?, ?, ?)`
+result, err := db.Exec(query, name, age, course)
+if err != nil {
+log.Printf("Worker %d: INSERT error: %v\n", workerID, err)
+return
+}
+id, _ := result.LastInsertId()
+log.Printf("Worker %d: INSERT completed - ID=%d\n", workerID, id)
+}
+// READ
+func readStudents(workerID int, wg *sync.WaitGroup) {
+defer wg.Done()
+rows, err := db.Query("SELECT id, name, age, course FROM students")
+if err != nil {
+log.Printf("Worker %d: READ error: %v\n", workerID, err)
+return
+}
+defer rows.Close()
+for rows.Next() {
+var id, age int
+var name, course string
+rows.Scan(&id, &name, &age, &course)
+log.Printf("Worker %d: READ -> ID=%d, Name=%s, Age=%d, Course=%s\n",
+workerID, id, name, age, course)
+}
+}
+// UPDATE
+func updateStudent(workerID int, wg *sync.WaitGroup) {
+defer wg.Done()
+query := `UPDATE students SET course=? WHERE id=?`
+_, err := db.Exec(query, fmt.Sprintf("UpdatedCourse%d", workerID), workerID)
+if err != nil {
+log.Printf("Worker %d: UPDATE error: %v\n", workerID, err)
+return
+}
+log.Printf("Worker %d: UPDATE completed\n", workerID)
+}
+// DELETE
+func deleteStudent(workerID int, wg *sync.WaitGroup) {
+defer wg.Done()
+query := `DELETE FROM students WHERE id=?`
+_, err := db.Exec(query, workerID)
+if err != nil {
+log.Printf("Worker %d: DELETE error: %v\n", workerID, err)
+return
+}
+log.Printf("Worker %d: DELETE completed\n", workerID)
+}
+func main() {
+// Set goroutine scheduler to use 3 logical processors
+runtime.GOMAXPROCS(3)
+// Connect to MySQL
+var err error
+db, err = sql.Open("mysql", "root:Passwor@tcp(127.0.0.1:3306)/college")
+if err != nil {
+log.Fatal(err)
+}
+defer db.Close()
+// Test connection
+if err := db.Ping(); err != nil {
+log.Fatal("Database connection failed:", err)
+}
+log.Println("Connected to MySQL successfully!")
+// WaitGroup for goroutines
+var wg sync.WaitGroup
+// Spawn multiple goroutines for CRUD
+for i := 1; i <= 5; i++ {
+wg.Add(4)
+go createStudent(i, &wg)
+go readStudents(i, &wg)
+go updateStudent(i, &wg)
+go deleteStudent(i, &wg)
+}
+// Wait for all goroutines to finish
+wg.Wait()
+log.Println("All goroutines completed.")
+}
