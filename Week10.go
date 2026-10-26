@@ -1,0 +1,26 @@
+package main
+
+import "fmt"
+
+func main() {
+    arr := [8]int{10, 20, 10, 30, 20, 40, 50, 40}
+    n := len(arr)
+    var result [8]int
+    count:=0
+    for i:=0;i<n;i++ {
+        duplicate := false
+        for j :=0;j<count;j++ {
+            if arr[i]==result[j] {
+                duplicate = true
+                break
+            }
+        } 
+        if !duplicate {
+            result[count]=arr[i]
+            count++
+        }
+    }
+    for i:=0;i<count;i++ {
+        fmt.Print(result[i]," ")
+    }
+}
